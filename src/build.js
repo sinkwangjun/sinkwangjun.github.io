@@ -29,10 +29,9 @@ const SITE_DESCRIPTION =
 // 배포 도메인. GitHub Pages 프로젝트 페이지는 경로 접두사를 포함한다.
 // 예:  SITE_URL=https://myname.github.io/law-blog node src/build.js
 // (또는 아래 기본값을 본인 주소로 직접 수정)
-const SITE_URL = (process.env.SITE_URL || 'https://YOURNAME.github.io/law-blog').replace(
-  /\/+$/,
-  ''
-);
+const SITE_URL = (
+  process.env.SITE_URL || 'https://sin96677596.github.io/blog-posts'
+).replace(/\/+$/, '');
 
 // --- 유틸 ---------------------------------------------------------------
 
