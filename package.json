@@ -1,0 +1,10 @@
+{
+  "name": "law-blog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "마크다운을 정적 HTML로 변환하는 한국어 법률 블로그 (프레임워크 없음)",
+  "scripts": {
+    "build": "node src/build.js",
+    "serve": "node src/build.js && npx --yes serve dist"
+  }
+}
