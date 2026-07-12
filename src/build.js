@@ -30,7 +30,7 @@ const SITE_DESCRIPTION =
 // 예:  SITE_URL=https://myname.github.io/law-blog node src/build.js
 // (또는 아래 기본값을 본인 주소로 직접 수정)
 const SITE_URL = (
-  process.env.SITE_URL || 'https://sin96677596.github.io'
+  process.env.SITE_URL || 'https://sinkwangjun.github.io'
 ).replace(/\/+$/, '');
 
 // --- 유틸 ---------------------------------------------------------------
