@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { renderIndex, renderPost } = require('./templates/layout');
+const { renderIndex, renderPost, render404 } = require('./templates/layout');
 
 // marked 벤더 로드 (UMD)
 const markedMod = require('./vendor/marked.min.js');
@@ -219,21 +219,29 @@ function build() {
     if (p.category && !categories.includes(p.category)) categories.push(p.category);
   }
 
-  // 개별 글 페이지
-  for (const post of posts) {
+  // 개별 글 페이지 (posts는 최신순: index 0이 가장 최신)
+  posts.forEach((post, i) => {
     const rawHtml = marked.parse(post.body);
     const { html: contentHtml, toc } = addHeadingIds(rawHtml);
-    const html = renderPost({ post, contentHtml, toc });
+    const newer = posts[i - 1]; // 더 최신 글
+    const older = posts[i + 1]; // 더 오래된 글
+    const nav = {
+      prev: older ? { slug: older.slug, title: older.title } : null, // 이전 글(오래된)
+      next: newer ? { slug: newer.slug, title: newer.title } : null, // 다음 글(최신)
+    };
+    const html = renderPost({ post, contentHtml, toc, nav });
     fs.writeFileSync(path.join(DIST_DIR, 'posts', `${post.slug}.html`), html, 'utf8');
-  }
+  });
 
-  // 목록 페이지
+  // 목록 페이지 + 404
   const indexHtml = renderIndex({ posts, categories, siteDescription: SITE_DESCRIPTION });
   fs.writeFileSync(path.join(DIST_DIR, 'index.html'), indexHtml, 'utf8');
+  fs.writeFileSync(path.join(DIST_DIR, '404.html'), render404(), 'utf8');
 
   // 정적 자산 복사
   fs.copyFileSync(path.join(SRC_DIR, 'style.css'), path.join(DIST_DIR, 'style.css'));
   fs.copyFileSync(path.join(SRC_DIR, 'main.js'), path.join(DIST_DIR, 'main.js'));
+  fs.copyFileSync(path.join(SRC_DIR, 'favicon.svg'), path.join(DIST_DIR, 'favicon.svg'));
   copyDir(path.join(SRC_DIR, 'vendor', 'fonts'), path.join(DIST_DIR, 'fonts'));
   copyDir(ASSETS_DIR, path.join(DIST_DIR, 'assets'));
 

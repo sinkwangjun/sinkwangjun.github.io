@@ -29,6 +29,7 @@ function shell({ title, description, bodyClass = '', main, rootPrefix = './' }) 
   <meta property="og:title" content="${esc(title)}" />
   <meta property="og:description" content="${desc}" />
   <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="${rootPrefix}favicon.svg" />
   <link rel="alternate" type="application/atom+xml" title="법률 실무 노트" href="${rootPrefix}feed.xml" />
   <link rel="stylesheet" href="${rootPrefix}style.css" />
   <script>
@@ -106,8 +107,26 @@ function renderIndex({ posts, categories, siteDescription }) {
   });
 }
 
+// 글 하단 이전/다음 이동 (prev = 더 오래된 글, next = 더 최신 글)
+function renderPostNav(nav = {}) {
+  const { prev, next } = nav;
+  if (!prev && !next) return '';
+  const item = (p, dir, label) =>
+    p
+      ? `<a class="post-nav__link post-nav__link--${dir}" href="${esc(p.slug)}.html">
+          <span class="post-nav__dir">${label}</span>
+          <span class="post-nav__title">${esc(p.title)}</span>
+        </a>`
+      : '<span class="post-nav__link post-nav__link--empty"></span>';
+  return `
+    <nav class="post-nav" aria-label="이전·다음 글">
+      ${item(prev, 'prev', '← 이전 글')}
+      ${item(next, 'next', '다음 글 →')}
+    </nav>`;
+}
+
 // 개별 글 페이지
-function renderPost({ post, contentHtml, toc = [] }) {
+function renderPost({ post, contentHtml, toc = [], nav = {} }) {
   const kw = (post.keywords || [])
     .map((k) => `<li class="kw">#${esc(k)}</li>`)
     .join('');
@@ -145,6 +164,7 @@ function renderPost({ post, contentHtml, toc = [] }) {
 ${contentHtml}
       </div>
     </article>
+    ${renderPostNav(nav)}
     <a class="back-link back-link--bottom" href="../index.html">← 목록으로</a>`;
 
   return shell({
@@ -156,4 +176,22 @@ ${contentHtml}
   });
 }
 
-module.exports = { renderIndex, renderPost, esc, fmtDate };
+// 404 페이지
+function render404() {
+  const main = `
+    <section class="notfound">
+      <p class="notfound__code">404</p>
+      <h1 class="notfound__title">페이지를 찾을 수 없습니다</h1>
+      <p class="notfound__lede">주소가 바뀌었거나 삭제된 글일 수 있습니다.</p>
+      <a class="notfound__home" href="/index.html">← 목록으로 돌아가기</a>
+    </section>`;
+  return shell({
+    title: '404 · 법률 실무 노트',
+    description: '페이지를 찾을 수 없습니다.',
+    bodyClass: 'page-404',
+    main,
+    rootPrefix: '/',
+  });
+}
+
+module.exports = { renderIndex, renderPost, render404, esc, fmtDate };

@@ -31,7 +31,8 @@
 │   ├── build.js              # Node 빌드: posts/ 읽어 dist/에 정적 HTML 생성
 │   ├── style.css             # 디자인 시스템(토큰·다크모드·반응형·@font-face)
 │   ├── main.js               # 다크모드 토글 + 카테고리 필터
-│   ├── templates/layout.js   # 페이지 HTML 템플릿
+│   ├── favicon.svg           # 탭 아이콘(§ 마크)
+│   ├── templates/layout.js   # 페이지 HTML 템플릿(목록·글·404·이전/다음)
 │   └── vendor/
 │       ├── marked.min.js     # 벤더링한 마크다운 파서(marked v12)
 │       └── fonts/PretendardVariable.woff2  # 벤더링한 한글 가변폰트
@@ -52,7 +53,7 @@
   1. `posts/*.md` 순회.
   2. 각 파일의 `---` 프론트매터 블록을 직접 파싱(간단 YAML)하고, 본문만 `vendor/marked.min.js`로 HTML 변환.
   3. 렌더된 HTML의 `h2/h3`에 앵커 `id`를 부여하고 **목차(TOC)**를 수집(제목 2개 이상일 때 글 상단에 표시).
-  4. 각 글을 `dist/posts/<slug>.html`로, 글 목록을 `dist/index.html`로 생성.
+  4. 각 글을 `dist/posts/<slug>.html`(하단에 이전/다음 글 이동 포함)로, 글 목록을 `dist/index.html`로, 없는 주소용 `dist/404.html`을 생성.
   5. `style.css`·`main.js`·`fonts/`·`assets/`를 `dist/`로 복사하고, GitHub Pages용 `.nojekyll`을 생성.
   6. **SEO 파일 생성**: `sitemap.xml`·`robots.txt`·`feed.xml`(Atom). 절대주소는 `SITE_URL`을 사용.
 - **SITE_URL**: sitemap/feed의 절대주소용. 기본값은 placeholder(`https://YOURNAME.github.io/law-blog`)이며, 배포 주소에 맞게 `src/build.js`의 기본값을 수정하거나 `SITE_URL=... node src/build.js`로 지정. (Pages 워크플로에 `env: SITE_URL:`을 추가해도 됨.)
