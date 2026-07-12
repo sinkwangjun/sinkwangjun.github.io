@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       # 런타임 npm 의존성 없음(marked는 src/vendor에 벤더링) → 설치 단계 불필요
       - name: Build static site
