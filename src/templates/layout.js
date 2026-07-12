@@ -29,6 +29,7 @@ function shell({ title, description, bodyClass = '', main, rootPrefix = './' }) 
   <meta property="og:title" content="${esc(title)}" />
   <meta property="og:description" content="${desc}" />
   <meta property="og:type" content="website" />
+  <link rel="alternate" type="application/atom+xml" title="법률 실무 노트" href="${rootPrefix}feed.xml" />
   <link rel="stylesheet" href="${rootPrefix}style.css" />
   <script>
     // 다크모드 FOUC 방지: 사용자가 명시 선택한 경우에만 즉시 반영

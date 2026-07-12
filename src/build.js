@@ -22,8 +22,17 @@ const ASSETS_DIR = path.join(ROOT, 'assets');
 const SRC_DIR = __dirname;
 const DIST_DIR = path.join(ROOT, 'dist');
 
+const SITE_TITLE = '법률 실무 노트';
 const SITE_DESCRIPTION =
   '부동산등기·판례·법령 등 실무에서 자주 마주치는 쟁점을 알기 쉽게 정리합니다.';
+
+// 배포 도메인. GitHub Pages 프로젝트 페이지는 경로 접두사를 포함한다.
+// 예:  SITE_URL=https://myname.github.io/law-blog node src/build.js
+// (또는 아래 기본값을 본인 주소로 직접 수정)
+const SITE_URL = (process.env.SITE_URL || 'https://YOURNAME.github.io/law-blog').replace(
+  /\/+$/,
+  ''
+);
 
 // --- 유틸 ---------------------------------------------------------------
 
@@ -65,6 +74,76 @@ function parseFrontMatter(raw) {
     data[key] = val;
   }
   return { data, body: m[2] };
+}
+
+// XML 이스케이프 (sitemap / feed 용)
+function xmlEsc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+// YYYY-MM-DD -> RFC3339 (KST). Atom/lastmod 용.
+function toRfc3339(date) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(date || ''));
+  return m ? `${m[1]}-${m[2]}-${m[3]}T00:00:00+09:00` : '';
+}
+
+// sitemap.xml / robots.txt / feed.xml(Atom) 생성
+function writeSeoFiles(posts) {
+  const home = `${SITE_URL}/`;
+
+  // sitemap
+  const urls = [{ loc: home, lastmod: posts[0] ? posts[0].date : '' }].concat(
+    posts.map((p) => ({ loc: `${SITE_URL}/posts/${p.slug}.html`, lastmod: p.date }))
+  );
+  const sitemap =
+    `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    urls
+      .map(
+        (u) =>
+          `  <url><loc>${xmlEsc(u.loc)}</loc>${
+            u.lastmod ? `<lastmod>${xmlEsc(u.lastmod)}</lastmod>` : ''
+          }</url>`
+      )
+      .join('\n') +
+    `\n</urlset>\n`;
+  fs.writeFileSync(path.join(DIST_DIR, 'sitemap.xml'), sitemap, 'utf8');
+
+  // robots.txt
+  const robots = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;
+  fs.writeFileSync(path.join(DIST_DIR, 'robots.txt'), robots, 'utf8');
+
+  // Atom feed
+  const updated = toRfc3339(posts[0] ? posts[0].date : '') || `${new Date().getFullYear()}-01-01T00:00:00+09:00`;
+  const entries = posts
+    .map(
+      (p) => `  <entry>
+    <title>${xmlEsc(p.title)}</title>
+    <link href="${xmlEsc(`${SITE_URL}/posts/${p.slug}.html`)}"/>
+    <id>${xmlEsc(`${SITE_URL}/posts/${p.slug}.html`)}</id>
+    <updated>${xmlEsc(toRfc3339(p.date))}</updated>
+    <category term="${xmlEsc(p.category)}"/>
+    <summary>${xmlEsc(p.summary)}</summary>
+  </entry>`
+    )
+    .join('\n');
+  const feed = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>${xmlEsc(SITE_TITLE)}</title>
+  <subtitle>${xmlEsc(SITE_DESCRIPTION)}</subtitle>
+  <link href="${xmlEsc(`${SITE_URL}/feed.xml`)}" rel="self"/>
+  <link href="${xmlEsc(home)}"/>
+  <id>${xmlEsc(home)}</id>
+  <updated>${xmlEsc(updated)}</updated>
+${entries}
+</feed>
+`;
+  fs.writeFileSync(path.join(DIST_DIR, 'feed.xml'), feed, 'utf8');
 }
 
 // 제목 텍스트 -> 앵커 id (한글 유지)
@@ -162,7 +241,16 @@ function build() {
   // GitHub Pages가 _폴더 등을 Jekyll로 처리하지 않도록
   fs.writeFileSync(path.join(DIST_DIR, '.nojekyll'), '');
 
+  // SEO: sitemap.xml / robots.txt / feed.xml
+  writeSeoFiles(posts);
+
   console.log(`빌드 완료: 글 ${posts.length}개, 카테고리 ${categories.length}개 -> dist/`);
+  if (/YOURNAME/.test(SITE_URL)) {
+    console.log(
+      `  ⚠ SITE_URL이 기본 placeholder입니다. sitemap/feed의 절대주소를 바꾸려면\n` +
+        `    SITE_URL=https://<사용자>.github.io/<저장소> 로 빌드하거나 src/build.js의 기본값을 수정하세요.`
+    );
+  }
 }
 
 build();

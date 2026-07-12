@@ -22,6 +22,7 @@
 ├── CLAUDE.md
 ├── package.json              # build/serve 스크립트(런타임 의존성 없음)
 ├── .gitignore                # dist/·node_modules·비공개 원고 폴더 제외
+├── .gitattributes            # 줄바꿈 LF 정규화 + 바이너리 표시
 ├── .github/workflows/deploy.yml  # GitHub Pages 자동 배포
 ├── posts/                    # 발행 원고 .md (frontmatter + markdown)
 │   ├── 2026-07-12-부동산등기-소유권이전.md
@@ -53,6 +54,8 @@
   3. 렌더된 HTML의 `h2/h3`에 앵커 `id`를 부여하고 **목차(TOC)**를 수집(제목 2개 이상일 때 글 상단에 표시).
   4. 각 글을 `dist/posts/<slug>.html`로, 글 목록을 `dist/index.html`로 생성.
   5. `style.css`·`main.js`·`fonts/`·`assets/`를 `dist/`로 복사하고, GitHub Pages용 `.nojekyll`을 생성.
+  6. **SEO 파일 생성**: `sitemap.xml`·`robots.txt`·`feed.xml`(Atom). 절대주소는 `SITE_URL`을 사용.
+- **SITE_URL**: sitemap/feed의 절대주소용. 기본값은 placeholder(`https://YOURNAME.github.io/law-blog`)이며, 배포 주소에 맞게 `src/build.js`의 기본값을 수정하거나 `SITE_URL=... node src/build.js`로 지정. (Pages 워크플로에 `env: SITE_URL:`을 추가해도 됨.)
 - 목록 정렬: **날짜 최신순**, 카테고리 필터 지원(`main.js`).
 - 마크다운 파서는 반드시 **벤더링한 로컬 파일**을 쓴다. CDN·런타임 npm 의존성 추가 금지.
 - `dist/` 삭제 시 OneDrive 잠금 대비로 `rmSync`에 재시도 옵션 사용. **로컬 미리보기 서버를 켠 채로 재빌드하면 폴더 잠금(EPERM)이 날 수 있으니 서버를 끄고 빌드**한다.
