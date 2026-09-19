@@ -5,6 +5,8 @@
   "description": "마크다운을 정적 HTML로 변환하는 한국어 법률 블로그 (프레임워크 없음)",
   "scripts": {
     "build": "node src/build.js",
-    "serve": "node src/build.js && npx --yes serve dist"
+    "serve": "node src/build.js && npx --yes serve dist",
+    "새사건": "node 사건관리/새사건.js",
+    "사건점검": "node 사건관리/점검.js"
   }
 }

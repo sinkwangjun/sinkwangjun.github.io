@@ -13,3 +13,7 @@
 *.webp  binary
 *.ico   binary
 *.pdf   binary
+
+# 윈도우 배치 파일은 CRLF 로 내려받아야 실행됩니다
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
