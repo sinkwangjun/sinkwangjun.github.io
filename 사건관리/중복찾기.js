@@ -41,9 +41,9 @@ function 인수읽기(argv) {
 
 // 건너뛸 폴더와 파일
 const 제외폴더 = new Set(['node_modules', '.git', '$RECYCLE.BIN', 'System Volume Information', '.tmp.drivedownload']);
-const 제외파일 = new Set(['desktop.ini', 'Thumbs.db', '.DS_Store']);
+const 제외파일 = new Set(['desktop.ini', 'Thumbs.db', '.DS_Store', '중복보고서.csv', '정리계획.csv']);
 
-function 훑기(뿌리) {
+function 훑기(뿌리, 건너뛸경로) {
   const 결과 = [];
   const 쌓기 = [뿌리];
   while (쌓기.length > 0) {
@@ -58,7 +58,10 @@ function 훑기(뿌리) {
     for (const 항목 of 목록) {
       const 경로 = path.join(현재, 항목.name);
       if (항목.isDirectory()) {
-        if (!제외폴더.has(항목.name)) 쌓기.push(경로);
+        if (제외폴더.has(항목.name)) continue;
+        // 격리 폴더는 검사하지 아니합니다. 격리본을 다시 중복으로 잡으면 안 됩니다.
+        if (건너뛸경로 && path.resolve(경로) === 건너뛸경로) continue;
+        쌓기.push(경로);
       } else if (항목.isFile()) {
         if (제외파일.has(항목.name)) continue;
         try {
@@ -124,16 +127,24 @@ function 실행() {
     return;
   }
 
-  if (!fs.existsSync(대상)) {
-    console.error(`대상 폴더가 없습니다: ${대상}`);
+  const 뿌리 = path.resolve(대상);
+  if (!fs.existsSync(뿌리)) {
+    console.error(`대상 폴더가 없습니다: ${뿌리}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const 격리 = 인수['격리'] && 인수['격리'] !== true ? path.resolve(String(인수['격리'])) : null;
+  if (격리 && (격리 === 뿌리 || 뿌리.startsWith(격리 + path.sep))) {
+    console.error(`격리 폴더가 대상 폴더를 품고 있습니다. 다른 위치를 지정하십시오.\n  대상: ${뿌리}\n  격리: ${격리}`);
     process.exitCode = 1;
     return;
   }
 
   const 최소 = 인수['최소'] && 인수['최소'] !== true ? Number(인수['최소']) : 1024;
-  console.log(`대상: ${대상}`);
+  console.log(`대상: ${뿌리}`);
   console.log('파일 목록을 훑습니다.');
-  const 전체 = 훑기(대상).filter((f) => f.크기 >= 최소);
+  const 전체 = 훑기(뿌리, 격리).filter((f) => f.크기 >= 최소);
   console.log(`  파일 ${전체.length.toLocaleString()}개`);
 
   // 크기가 같은 파일만 해시합니다. 크기가 다르면 내용이 같을 수 없습니다.
@@ -187,23 +198,22 @@ function 실행() {
 
   const 보고서 =
     인수['보고서'] && 인수['보고서'] !== true
-      ? String(인수['보고서'])
-      : path.join(대상, '중복보고서.csv');
+      ? path.resolve(String(인수['보고서']))
+      : path.join(뿌리, '중복보고서.csv');
   fs.writeFileSync(보고서, `\uFEFF${줄.join('\n')}\n`, 'utf8');
 
   console.log(`\n내용이 완전히 같은 묶음 ${묶음.length}개`);
   console.log(`중복본 ${묶음.reduce((a, [, v]) => a + v.length - 1, 0)}개, 되찾을 용량 ${용량표기(낭비)}`);
   console.log(`보고서: ${보고서}`);
 
-  const 격리 = 인수['격리'];
-  if (격리 && 격리 !== true) {
-    const 격리폴더 = path.resolve(String(격리));
+  if (격리) {
+    const 격리폴더 = 격리;
     fs.mkdirSync(격리폴더, { recursive: true });
     let 옮김 = 0;
     for (const [, v] of 묶음) {
       v.sort((a, b) => a.수정일 - b.수정일);
       for (const f of v.slice(1)) {
-        const 상대 = path.relative(대상, f.경로);
+        const 상대 = path.relative(뿌리, f.경로);
         const 목적 = path.join(격리폴더, 상대);
         fs.mkdirSync(path.dirname(목적), { recursive: true });
         try {
