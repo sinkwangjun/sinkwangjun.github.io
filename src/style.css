@@ -208,6 +208,41 @@ main.wrap {
   font-weight: 700;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.yt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding-inline: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--step--1);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.yt-link:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.yt-link__icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+@media (max-width: 420px) {
+  .yt-link__label { display: none; }
+  .yt-link { width: 40px; padding: 0; justify-content: center; }
+}
+
 .theme-toggle {
   width: 40px;
   height: 40px;
@@ -251,8 +286,15 @@ main.wrap {
   color: var(--muted);
   font-size: var(--step--1);
 }
+.site-footer .wrap {
+  display: grid;
+  gap: 6px;
+}
 .site-footer p {
   margin: 0;
+}
+.site-footer a {
+  color: var(--accent);
 }
 
 /* ---- 홈: 인트로 ---- */

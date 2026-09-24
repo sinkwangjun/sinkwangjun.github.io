@@ -16,6 +16,9 @@ function fmtDate(d) {
   return m ? `${m[1]}.${m[2]}.${m[3]}` : esc(d);
 }
 
+// 유튜브 채널 '법무사신광준TV'
+const YOUTUBE_URL = 'https://www.youtube.com/@tv-yp7mv';
+
 // 공통 문서 셸. rootPrefix: 하위 페이지에서 './' 또는 '../'
 function shell({ title, description, bodyClass = '', main, rootPrefix = './' }) {
   const desc = esc(description || '');
@@ -49,10 +52,17 @@ function shell({ title, description, bodyClass = '', main, rootPrefix = './' }) 
   <header class="site-header">
     <div class="wrap header-inner">
       <a class="brand" href="${rootPrefix}index.html">법률 실무 노트</a>
-      <button id="theme-toggle" class="theme-toggle" type="button"
-              aria-label="테마 전환" title="라이트/다크 전환">
-        <span class="theme-toggle__icon" aria-hidden="true"></span>
-      </button>
+      <div class="header-actions">
+        <a class="yt-link" href="${YOUTUBE_URL}" target="_blank" rel="noopener"
+           aria-label="유튜브 채널 법무사신광준TV (새 창)">
+          <svg class="yt-link__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg>
+          <span class="yt-link__label">유튜브</span>
+        </a>
+        <button id="theme-toggle" class="theme-toggle" type="button"
+                  aria-label="테마 전환" title="라이트/다크 전환">
+          <span class="theme-toggle__icon" aria-hidden="true"></span>
+        </button>
+      </div>
     </div>
   </header>
   <main id="main" class="wrap">
@@ -60,6 +70,7 @@ ${main}
   </main>
   <footer class="site-footer">
     <div class="wrap">
+      <p>영상 강의: <a href="${YOUTUBE_URL}" target="_blank" rel="noopener">유튜브 법무사신광준TV</a></p>
       <p>© 법률 실무 노트 · 이 글은 일반적 정보 제공을 위한 것으로 법률 자문이 아닙니다.</p>
     </div>
   </footer>
